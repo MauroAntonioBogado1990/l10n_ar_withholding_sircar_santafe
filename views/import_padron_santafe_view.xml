@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+	<record model="ir.ui.view" id="import_padron_santafe_view_form">
+		<field name="name">import.padron.santafe.view.form</field>
+		<field name="model">import.padron.santafe</field>
+		<field name="arch" type="xml">
+			<form string="Importar Padron Santa Fe">
+				<header>
+					<button name="btn_process" type="object" string="Procesar" invisible="state != 'draft'"/>
+    				<field name="state" widget="statusbar" statusbar_visible="draft,processed"/>
+					<!--se agrega este boton de procesar coe116-->
+					<button name="btn_process_coe116" type="object" string="Procesar (COE116)"
+                        invisible="state != 'processed'"
+                        class="btn-primary"/>
+
+				</header>
+				<sheet>
+					<group>
+						<field name="name" />
+						<field name="padron_file" widget="binary" string="Subir padrón coef16"/>
+						<field name="delimiter" />
+						<field name="skip_first_line" />
+						<field name="padron_match" />
+						<field name="lineas_archivo" />
+					</group>
+					<!--agregados-->
+					<group string="Carga de (COE116 / RG 116/10)" invisible="state == 'draft'">
+                    <field name="coe116_file" widget="binary" string="Subir padrón" 
+                           required="state == 'processed'"/>
+                    </group>
+
+					<notebook>
+						<page string="Contenido" >
+							<field name="file_content" readonly="1"/>
+						</page>
+						<page string="No procesados">
+							<field name="not_processed_content" readonly="1"/>
+						</page>
+                        <page string="Padrones Cargados">
+                                <field name="clientes_cargados" readonly="1"/>
+                        </page>
+						<page string="Resultado de padron" name="coe_result" invisible="state == 'draft'">
+                        <group>
+                            <field name="coe116_result" readonly="1" nolabel="1"/>
+                        </group>
+                        </page>
+					</notebook>
+				</sheet>
+			</form>
+		</field>
+	</record>
+
+	<record model="ir.ui.view" id="import_padron_santafe_list">
+		<field name="name">import.padron.santafe.view.list</field>
+		<field name="model">import.padron.santafe</field>
+		<field name="arch" type="xml">
+		<list string="Import Padron Santa Fe">
+			<field name="name" />
+			<field name="padron_file" />
+			<field name="state" />
+		</list>
+		</field>
+	</record>
+
+	<record model="ir.actions.act_window" id="action_import_padron_santafe">
+		<field name="name">Cargar Padron Santa Fe</field>
+		<field name="res_model">import.padron.santafe</field>
+		<field name="view_mode">list,form</field>
+	</record>
+
+
+	<menuitem name="Carga padron Santa Fe" id="import_padron_santafe_form"
+		parent="account.account_account_menu"
+		action="action_import_padron_santafe"
+		sequence="1"/>
+
+</odoo>

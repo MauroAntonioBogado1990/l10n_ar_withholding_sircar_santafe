@@ -20,6 +20,16 @@
                                 <field name="regimen_santafe_per"/>
                             </group>
                         </group>
+
+                        <group>
+                            <group string="Montos Mínimos 2026">
+                                <field name="l10n_ar_santafe_minimo_retencion"/>
+                                <field name="l10n_ar_santafe_minimo_percepcion"/>
+                            </group>
+                            <group string="Configuración CM">
+                                <field name="l10n_ar_santafe_porcentaje_general"/>
+                            </group>
+                        </group>
                     </page>
                 <!--</notebook>-->
             </page>

@@ -4,10 +4,9 @@
             <field name="name">res.partner.form</field>
             <field name="model">res.partner</field>
             <!--aqui se tiene que cambiar la herencia cuando se va a instalar en enterprise-->
-            
             <!--<field name="inherit_id" ref="l10n_ar_withholding.view_partner_property_form"/> -->
-            <field name="inherit_id" ref="l10n_ar_partner.view_partner_property_form"/>
-            <!--<field name="inherit_id" ref="base.view_partner_form"/>-->
+            <!-- <field name="inherit_id" ref="l10n_ar_partner.view_partner_property_form"/> -->
+            <field name="inherit_id" ref="base.view_partner_form"/>
             <field name="arch" type="xml">
 
                 <!-- <page name="fiscal_data" position="inside"> -->

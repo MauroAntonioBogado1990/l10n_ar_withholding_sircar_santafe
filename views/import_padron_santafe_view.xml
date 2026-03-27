@@ -18,7 +18,7 @@
 				<sheet>
 					<group>
 						<field name="name" />
-						<field name="padron_file" widget="binary" string="Subir padrón coef16"/>
+						<field name="padron_file" widget="binary" string="Subir padrón "/>
 						<field name="delimiter" />
 						<field name="skip_first_line" />
 						<field name="padron_match" />

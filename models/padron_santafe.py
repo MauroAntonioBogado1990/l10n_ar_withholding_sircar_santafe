@@ -165,26 +165,120 @@ class Padron(models.Model):
     nro_grupo_ret = fields.Char('Nro Grupo Retención')
     coeficiente = fields.Float('Coeficiente', digits=(16, 4))
 
+    # @api.model_create_multi
+    # def create(self, vals_list):
+    #     padrons = super(Padron, self).create(vals_list)
+    #     self._update_partner_alicuotas(padrons)
+    #     return padrons
+
+    # def write(self, vals):
+    #     res = super(Padron, self).write(vals)
+    #     campos_criticos = ['publication_date', 'effective_date_from', 'effective_date_to', 'alta_baja', 'a_per', 'a_ret']
+    #     if any(campo in vals for campo in campos_criticos):
+    #         self._update_partner_alicuotas(self)
+    #     return res
+    # En santafe.padron → create y write
+
+    
+
+    # def _update_partner_alicuotas(self, padrons):
+    #     Partner = self.env['res.partner'].sudo()
+    #     cuil_list = padrons.mapped('name')  # ya vienen normalizados (sin guiones)
+
+    #     # Buscar también por vat con guiones por compatibilidad
+    #     partners = Partner.search([
+    #         '|',
+    #         ('vat', 'in', cuil_list),
+    #         # Por si algún partner tiene el CUIT con guiones
+    #         ('vat', 'in', [
+    #             f"{c[0:2]}-{c[2:10]}-{c[10]}"
+    #             for c in cuil_list if len(c) == 11
+    #         ]),
+    #         ('parent_id', '=', False)
+    #     ])
+    #     # Normalizar el mapa de partners
+    #     partner_dict = {}
+    #     for p in partners:
+    #         if p.vat:
+    #             norm = ''.join(filter(str.isdigit, p.vat))
+    #             partner_dict[norm] = p
+
+    #     for padron in padrons:
+            
+    #         partner = partner_dict.get(padron.name)
+    #         if not partner:
+    #             continue
+
+    #         vals_alicuota = {
+    #             'partner_id': partner.id, 
+    #             'publication_date': padron.publication_date,
+    #             'effective_date_from': padron.effective_date_from,
+    #             'effective_date_to': padron.effective_date_to,
+    #             'type_contr_insc': padron.type_contr_insc,
+    #             'alta_baja': padron.alta_baja,
+    #             'cambio': padron.cambio,
+    #             'padron_activo': True
+    #         }
+
+    #         if padron.type_alicuot == 'R':
+    #             # Desactivar anteriores
+    #             activas = partner.alicuot_ret_santafe_ids.filtered('padron_activo')
+    #             if activas:
+    #                 activas.write({'padron_activo': False})
+                
+    #             vals_alicuota.update({'a_ret': padron.a_ret, 'nro_grupo_ret': padron.nro_grupo_ret})
+    #             partner.write({'alicuot_ret_santafe_ids': [(0, 0, vals_alicuota)]})
+                
+    #         elif padron.type_alicuot == 'P':
+    #             # Desactivar anteriores
+    #             activas = partner.alicuot_per_santafe_ids.filtered('padron_activo')
+    #             if activas:
+    #                 activas.write({'padron_activo': False})
+                
+    #             vals_alicuota.update({'a_per': padron.a_per, 'nro_grupo_per': padron.nro_grupo_perc})
+    #             partner.write({'alicuot_per_santafe_ids': [(0, 0, vals_alicuota)]})
+
     @api.model_create_multi
     def create(self, vals_list):
-        padrons = super(Padron, self).create(vals_list)
-        self._update_partner_alicuotas(padrons)
+        padrons = super().create(vals_list)
+        if not self.env.context.get('skip_partner_update'):
+            self._update_partner_alicuotas(padrons)
         return padrons
 
     def write(self, vals):
-        res = super(Padron, self).write(vals)
-        campos_criticos = ['publication_date', 'effective_date_from', 'effective_date_to', 'alta_baja', 'a_per', 'a_ret']
-        if any(campo in vals for campo in campos_criticos):
-            self._update_partner_alicuotas(self)
+        res = super().write(vals)
+        campos_criticos = ['publication_date', 'effective_date_from',
+                        'effective_date_to', 'alta_baja', 'a_per', 'a_ret']
+        if not self.env.context.get('skip_partner_update'):
+            if any(campo in vals for campo in campos_criticos):
+                self._update_partner_alicuotas(self)
         return res
 
     def _update_partner_alicuotas(self, padrons):
-        """Método auxiliar para actualizar los partners de forma optimizada"""
         Partner = self.env['res.partner'].sudo()
-        # Buscamos todos los partners afectados de una sola vez
-        cuil_list = padrons.mapped('name')
-        partners = Partner.search([('vat', 'in', cuil_list), ('parent_id', '=', False)])
-        partner_dict = {p.vat: p for p in partners if p.vat}
+        cuil_list = padrons.mapped('name')  # ya normalizados sin guiones
+
+        # Buscar partners tanto con CUIT normalizado como con guiones
+        def _with_guiones(cuit):
+            if len(cuit) == 11:
+                return f"{cuit[0:2]}-{cuit[2:10]}-{cuit[10]}"
+            return cuit
+
+        cuil_list_guiones = [_with_guiones(c) for c in cuil_list]
+
+        partners = Partner.search([
+            '|',
+            ('vat', 'in', cuil_list),
+            ('vat', 'in', cuil_list_guiones),
+            ('parent_id', '=', False),
+        ])
+
+        # Mapa normalizado → partner
+        partner_dict = {}
+        for p in partners:
+            if p.vat:
+                norm = ''.join(filter(str.isdigit, p.vat))
+                partner_dict[norm] = p
 
         for padron in padrons:
             partner = partner_dict.get(padron.name)
@@ -192,30 +286,32 @@ class Padron(models.Model):
                 continue
 
             vals_alicuota = {
-                'partner_id': partner.id, 
-                'publication_date': padron.publication_date,
+                'partner_id':          partner.id,
+                'publication_date':    padron.publication_date,
                 'effective_date_from': padron.effective_date_from,
-                'effective_date_to': padron.effective_date_to,
-                'type_contr_insc': padron.type_contr_insc,
-                'alta_baja': padron.alta_baja,
-                'cambio': padron.cambio,
-                'padron_activo': True
+                'effective_date_to':   padron.effective_date_to,
+                'type_contr_insc':     padron.type_contr_insc,
+                'alta_baja':           padron.alta_baja,
+                'cambio':              padron.cambio,
+                'padron_activo':       True,
             }
 
             if padron.type_alicuot == 'R':
-                # Desactivar anteriores
                 activas = partner.alicuot_ret_santafe_ids.filtered('padron_activo')
                 if activas:
                     activas.write({'padron_activo': False})
-                
-                vals_alicuota.update({'a_ret': padron.a_ret, 'nro_grupo_ret': padron.nro_grupo_ret})
+                vals_alicuota.update({
+                    'a_ret': padron.a_ret,
+                    'nro_grupo_ret': padron.nro_grupo_ret,
+                })
                 partner.write({'alicuot_ret_santafe_ids': [(0, 0, vals_alicuota)]})
-                
+
             elif padron.type_alicuot == 'P':
-                # Desactivar anteriores
                 activas = partner.alicuot_per_santafe_ids.filtered('padron_activo')
                 if activas:
                     activas.write({'padron_activo': False})
-                
-                vals_alicuota.update({'a_per': padron.a_per, 'nro_grupo_per': padron.nro_grupo_perc})
+                vals_alicuota.update({
+                    'a_per': padron.a_per,
+                    'nro_grupo_per': padron.nro_grupo_perc,
+                })
                 partner.write({'alicuot_per_santafe_ids': [(0, 0, vals_alicuota)]})

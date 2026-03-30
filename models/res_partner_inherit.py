@@ -81,6 +81,8 @@ class ResPartnerAlicuotRet(models.Model):
         ('CM', 'Convenio Multilatera'),
         ('CL', 'Contribuyente Local'),
         ('E', 'Exento'),
+        ('D', 'Directo (Local)'),   # ← AGREGADO
+        ('C', 'Convenio (CM)'),     # ← AGREGADO
     ], 'Tipo')
     alta_baja = fields.Selection([
         ('S', 'Se incorpora al padron'),
@@ -127,6 +129,8 @@ class ResPartnerAlicuotPer(models.Model):
         ('CM', 'Convenio Multilatera'),
         ('CL', 'Contribuyente Local'),
         ('E', 'Exento'),
+        ('D', 'Directo (Local)'),   # ← AGREGADO
+        ('C', 'Convenio (CM)'),     # ← AGREGADO
     ], 'Tipo')
     alta_baja = fields.Selection([
         ('S', 'Se incorpora al padron'),

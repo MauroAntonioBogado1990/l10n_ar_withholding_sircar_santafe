@@ -620,7 +620,7 @@ class ImportPadronSantaFe(models.Model):
                         'effective_date_to':   f_to,
                         'type_contr_insc':     type_contr,
                         'alta_baja':           alta_baja,
-                        'cambio':              False,
+                        'cambio':              '',
                     }
 
                     # Percepción

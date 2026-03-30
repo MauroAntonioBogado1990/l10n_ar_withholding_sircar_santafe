@@ -284,16 +284,16 @@ class Padron(models.Model):
             partner = partner_dict.get(padron.name)
             if not partner:
                 continue
-            cambio_val = padron.cambio if padron.cambio in ('S', 'N', 'B') else False
+
             vals_alicuota = {
-                'partner_id': partner.id, 
-                'publication_date': padron.publication_date,
+                'partner_id':          partner.id,
+                'publication_date':    padron.publication_date,
                 'effective_date_from': padron.effective_date_from,
-                'effective_date_to': padron.effective_date_to,
-                'type_contr_insc': padron.type_contr_insc,
-                'alta_baja': padron.alta_baja,
-                'cambio': cambio_val,
-                'padron_activo': True
+                'effective_date_to':   padron.effective_date_to,
+                'type_contr_insc':     padron.type_contr_insc,
+                'alta_baja':           padron.alta_baja,
+                'cambio':              padron.cambio,
+                'padron_activo':       True,
             }
 
             if padron.type_alicuot == 'R':

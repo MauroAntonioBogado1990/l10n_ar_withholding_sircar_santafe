@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_santafe_padron_form" model="ir.ui.view">
+        <field name="name">santafe.padron.form</field>
+        <field name="model">santafe.padron</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="type_alicuot" />
+                            <field name="name" />
+                            <field name="publication_date" />
+                            <field name="effective_date_from" />
+                            <field name="effective_date_to" />
+                            <field name="type_contr_insc" />
+                            <field name="alta_baja" />
+                        </group>
+                        <group>
+                            <field name="cambio" />
+                            <field name="a_per" />
+                            <field name="a_ret" />
+                            <field name="nro_grupo_perc" />
+                            <field name="nro_grupo_ret" />
+                            <!--se agrego el campo coeficiente-->
+                            <field name="coeficiente" />
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    
+
+    <record id="view_santafe_padron_list" model="ir.ui.view">
+        <field name="name">santafe.padron.list</field>
+        <field name="model">santafe.padron</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="type_alicuot" />
+                <field name="name" />
+                <field name="publication_date" />
+                <field name="effective_date_from" />
+                <field name="effective_date_to" />
+                <field name="a_per" />
+                <field name="a_ret" />
+                <field name="coeficiente" />
+            </list>
+        </field>
+    </record>
+
+    <record id="action_santafe_padron_list" model="ir.actions.act_window">
+        <field name="name">Padron Santa Fe</field>
+        <field name="res_model">santafe.padron</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain" eval="False"/>
+        <field name="view_id" ref="l10n_ar_withholding_sircar_santafe.view_santafe_padron_list"/>
+    </record>
+
+    <menuitem name="Padron IIBB Santa Fe" action="action_santafe_padron_list" id="menu_santafe_padron_list" parent="account.account_account_menu" sequence="1"/>
+</odoo>

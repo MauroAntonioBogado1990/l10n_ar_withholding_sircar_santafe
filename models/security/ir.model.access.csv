@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_account_export_santafe,account_export_santafe_user,model_account_export_santafe,base.group_user,1,1,1,1
+access_import_padron_santafe,import_padron_santafe_user,model_import_padron_santafe,base.group_user,1,1,1,1
+access_santafe_padron,sanatfe_padron_user,model_santafe_padron,base.group_user,1,1,1,1
+access_partner_padron_santafe_ret,access_partner_padron_santafe_ret,model_partner_padron_santafe_ret,base.group_user,1,1,1,1
+access_partner_padron_santafe_per,access_partner_padron_santafe_per,model_partner_padron_santafe_per,base.group_user,1,1,1,1
+

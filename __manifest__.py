@@ -15,7 +15,7 @@
     'depends': [
         'base',
         'account',
-        #'l10n_ar_sircar_regimenes',
+        'l10n_ar_sircar_regimenes',
     ],
     'installable': True,
     'version': '18.0.1.0.0',

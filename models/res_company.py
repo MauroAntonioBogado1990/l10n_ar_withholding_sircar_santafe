@@ -65,19 +65,3 @@ class ResCompany(models.Model):
         ('29', '29 - PADRÓN DE REGÍMENES GENERALES'),
         ('30', '30 - VENTA DIRECTA - (Vigente a partir del 01/01/2020)'),
     ],'Regimen Percepciones AGIP', company_dependent=True)
-    
-    l10n_ar_santafe_minimo_retencion = fields.Float(
-        string='Mínimo Retención IIBB Santa Fe', 
-        default=650000.0,
-        help="Monto neto a partir del cual se empieza a retener."
-    )
-    l10n_ar_santafe_minimo_percepcion = fields.Float(
-        string='Mínimo Percepción IIBB Santa Fe', 
-        default=360000.0,
-        help="Monto neto a partir del cual se empieza a percibir."
-    )
-    # Porcentaje general para cálculos de Convenio Multilateral
-    l10n_ar_santafe_porcentaje_general = fields.Float(
-        string='Alícuota General Santa Fe (%)', 
-        default=3.5
-    )

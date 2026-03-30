@@ -11,24 +11,22 @@ class ResPartner(models.Model):
     
     def get_amount_alicuot_santafe(self, type_alicuot, date):
         self.ensure_one()
-        
-        # 1. Definimos las alícuotas por defecto (Novedad 2026)
-        # Si no está en padrón: Retención 5% / Percepción 6%
-        default_rate = 6.0 if type_alicuot == 'per' else 5.0
-        amount_calculated = default_rate 
+        amount_calculated = 0.00
 
         def _to_fraction(val):
             try:
                 v = float(val or 0.0)
             except Exception:
                 return 0.0
+            # si viene como 1.5 (porcentaje) -> convertir a fracción 0.015
             if v > 1:
                 return v / 100.0
             return v
 
+        # Porcentaje general configurado en la compañia (se normaliza a fracción)
         porcentaje_general = float(self.env.company.l10n_ar_santafe_porcentaje_general or 0.0)
-
         if type_alicuot == 'per':
+            # Percepciones (RG 116/10): coeficiente * (0.5 si CM else 1) * porcentaje_general
             alicuot = self.alicuot_per_santafe_ids.filtered(
                 lambda l: l.effective_date_from <= date and l.effective_date_to >= date
             )
@@ -36,16 +34,14 @@ class ResPartner(models.Model):
                 line = alicuot[0]
                 if line.type_contr_insc == 'E':
                     return 0.0
-                
-                # Cálculo según RG 116/10
                 coeficiente_frac = _to_fraction(line.a_per)
                 factor = 0.5 if line.type_contr_insc == 'CM' else 1.0
                 amount_fraction = coeficiente_frac * factor * porcentaje_general
+                # retornamos porcentaje (ej: 1.5)
                 amount_calculated = amount_fraction * 100.0
-            else:
-                _logger.info("=== SANTA FE: Partner %s no está en padrón de Percepción. Aplicando 6%% defecto.", self.name)
 
         elif type_alicuot == 'ret':
+            # Retenciones (RG 176/10): usar el porcentaje del archivo acreditan (a_ret)
             alicuot = self.alicuot_ret_santafe_ids.filtered(
                 lambda l: l.effective_date_from <= date and l.effective_date_to >= date
             )
@@ -53,11 +49,8 @@ class ResPartner(models.Model):
                 line = alicuot[0]
                 if line.type_contr_insc == 'E':
                     return 0.0
-                
-                # a_ret del archivo (RG 176/10)
+                # a_ret normalmente viene como porcentaje (ej 1.5)
                 amount_calculated = float(line.a_ret or 0.0)
-            else:
-                _logger.info("=== SANTA FE: Partner %s no está en padrón de Retención. Aplicando 5%% defecto.", self.name)
 
         return amount_calculated
 

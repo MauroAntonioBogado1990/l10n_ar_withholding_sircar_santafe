@@ -11,13 +11,11 @@
 
                 <!-- <page name="fiscal_data" position="inside"> -->
                 <xpath expr="//page[@name='internal_notes']" position="after">
-                <!-- <page name="internal_notes" position="after"> -->
-                <!--Original-->
-                <page name="Per/Ret Santa Fe" position="after">
+                <page string="Per/Ret Santa Fe">
                 
                     <h3 style="text-align: center;">Retenciones IIBB Santa Fe</h3>
                     <field name="alicuot_ret_santafe_ids">
-                        <list string="Retenciones IIBB Santa Fe" editable="bottom">
+                        <tree string="Retenciones IIBB Santa Fe" editable="bottom">
                             <field name="publication_date"/>
                             <field name="effective_date_from"/>
                             <field name="effective_date_to"/>
@@ -27,11 +25,11 @@
                             <field name="a_ret"/>
                             <field name="nro_grupo_ret"/>
                             <field name="coeficiente"/> <!--se agrego el campo coeficiente-->
-                        </list>
+                        </tree>
                     </field>
                     <h3 style="text-align: center;">Percepciones IIBB Santa Fe</h3>
                     <field name="alicuot_per_santafe_ids">
-                        <list string="Percepciones IIBB Santa Fe" editable="bottom">
+                        <tree string="Percepciones IIBB Santa Fe" editable="bottom">
                             <field name="publication_date"/>
                             <field name="effective_date_from"/>
                             <field name="effective_date_to"/>
@@ -41,7 +39,7 @@
                             <field name="a_per"/>
                             <field name="nro_grupo_per"/>
                             <field name="coeficiente"/> <!--se agrego el campo coeficiente-->
-                        </list>
+                        </tree>
                     </field>
                 </page>
                </xpath>

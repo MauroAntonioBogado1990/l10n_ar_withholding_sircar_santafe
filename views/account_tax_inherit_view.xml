@@ -6,13 +6,18 @@
         <field name="model">account.tax</field>
         <field name="inherit_id" ref="account.view_tax_form"/>
         <field name="arch" type="xml">
-
-            <field name="withholding_python_compute" position="after">
             
-                <!-- <field name="tax_santafe_ret" attrs="{'invisible': [('withholding_type', '!=', 'partner_iibb_padron')]}" colspan="2"/> -->
-                <!--<field name="tax_santafe_ret" invisible="('withholding_type', '!=', 'partner_iibb_padron')" colspan="2"/>-->
+            <field name="name" position="after">
+            
+                <!-- <field name="tax_santafe_ret" invisible="withholding_type != 'partner_iibb_padron'" colspan="2"/> -->
+                <field name="tax_santafe_ret"  colspan="2"/>
+            </field>    
+             <!-- <field name="withholding_python_compute" position="after"> 
+            
+                <field name="tax_santafe_ret" attrs="{'invisible': [('withholding_type', '!=', 'partner_iibb_padron')]}" colspan="2"/> 
+                <field name="tax_santafe_ret" invisible="('withholding_type', '!=', 'partner_iibb_padron')" colspan="2"/>
                 <field name="tax_santafe_ret" invisible="withholding_type != 'partner_iibb_padron'" colspan="2"/>
-            </field>
+            </field> -->
 
         </field>
     </record>

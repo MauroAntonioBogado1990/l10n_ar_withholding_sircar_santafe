@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="view_sircar_regimenes_tree" model="ir.ui.view">
+            <field name="name">sircar.regimenes.tree</field>
+            <field name="model">sircar.regimenes</field>
+            <field name="arch" type="xml">
+                <tree string="Regimenes SIRCAR" >
+                    <field name="name"/>
+                    <field name="jurisdiccion"/>
+                    <field name="n_jur"/>
+                    <field name="n_reg"/>
+                    <field name="vigente"/>
+                    <field name="desde"/>
+                    <field name="hasta"/>
+                    <field name="id_tipo"/>
+                    <field name="desc"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="action_regimenes_sircar">
+            <field name="name">Regimenes SIRCAR</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">sircar.regimenes</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+	<menuitem name="Regimenes SIRCAR" action="action_regimenes_sircar" id="menu_action_regimenes_sricar"
+	       	sequence="96" parent="l10n_ar.menu_afip_config"/>
+
+    </data>
+</odoo>

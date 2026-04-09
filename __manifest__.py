@@ -5,7 +5,7 @@
     'category': 'Accounting & Finance',
     'data': [
         #'views/account_export_santafe_view.xml',
-        #'views/santafe_padron.xml',
+        'views/santafe_padron.xml',
         'views/import_padron_santafe_view.xml',
         #'views/res_partner_view.xml',
         'views/account_tax_inherit_view.xml',

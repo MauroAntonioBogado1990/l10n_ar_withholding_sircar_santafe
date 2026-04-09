@@ -66,13 +66,13 @@
     <record id="view_account_export_santafe_list" model="ir.ui.view">
          <field name="name">account.export.santafe.list</field>
          <field name="model">account.export.santafe</field>
-         <field name="arch" type="xml">
-            <list>
-		<field name="name" />
-		<field name="date_from" />
-		<field name="date_to" />
-            </list>
-         </field>
+            <field name="arch" type="xml">
+                <tree>
+                     <field name="name" />
+                     <field name="date_from" />
+                     <field name="date_to" />
+                </tree>
+            </field>
     </record>
 
 
@@ -81,7 +81,7 @@
             <field name="name">Exportaciones de Santa Fe</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">account.export.santafe</field>
-            <field name="view_mode">list,form</field>
+            <field name="view_mode">tree,form</field>
         </record>
 
         <menuitem id="menu_account_export_santafe"

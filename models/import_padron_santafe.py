@@ -270,6 +270,149 @@ class ImportPadronSantaFe(models.Model):
         self.state = 'coe_processed'
     
 
+    # def btn_process(self):
+    #     self.ensure_one()
+
+    #     if not self.padron_file:
+    #         raise ValidationError('Debe seleccionar el archivo.')
+    #     if self.state != 'draft':
+    #         raise ValidationError('¡El archivo ya fue procesado!')
+
+    #     # Helpers
+    #     def _parse_float(s):
+    #         try:
+    #             if not s: return 0.0
+    #             s_raw = str(s).strip()
+    #             if not s_raw or all(ch == '-' for ch in s_raw): return 0.0
+    #             return float(s_raw.replace(',', '.').replace('-', ''))
+    #         except Exception:
+    #             return 0.0
+
+    #     def _parse_compact_date(s):
+    #         """Maneja fechas DDMMYYYY. Usa zfill(8) por si la API envía 1042026 en vez de 01042026"""
+    #         s = (s or '').strip()
+    #         if not s: return None
+    #         s = s.zfill(8) 
+    #         if len(s) == 8 and s.isdigit():
+    #             return datetime.strptime(s, '%d%m%Y').date()
+    #         return None
+
+    #     # Decode archivo
+    #     file_bytes = base64.b64decode(self.padron_file)
+    #     file_text = None
+    #     for enc in ('utf-8', 'utf-8-sig', 'cp1252', 'latin-1'):
+    #         try:
+    #             file_text = file_bytes.decode(enc)
+    #             break
+    #         except UnicodeDecodeError:
+    #             continue
+
+    #     lines = file_text.splitlines()
+
+    #     # OPTIMIZACIÓN 1: Obtener todos los CUITs existentes en la BD vía SQL para velocidad extrema
+    #     self.env.cr.execute("SELECT vat FROM res_partner WHERE vat IS NOT NULL AND parent_id IS NULL")
+    #     cuit_partners = set(row[0] for row in self.env.cr.fetchall() if row[0])
+
+    #     # OPTIMIZACIÓN 2: Cargar el padrón existente en memoria para saber si actualizar o crear
+    #     existing_padrons_domain = [('name', 'in', list(cuit_partners))]
+    #     existing_padrons = self.env['santafe.padron'].sudo().search_read(
+    #         existing_padrons_domain, ['name', 'type_alicuot', 'id']
+    #     )
+    #     # Diccionario: {(cuit, 'P'): id_registro, (cuit, 'R'): id_registro}
+    #     padron_map = {(p['name'], p['type_alicuot']): p['id'] for p in existing_padrons}
+
+    #     to_create = []
+    #     to_update_ids = []
+    #     vals_to_update = []
+        
+    #     procesados = 0
+    #     BATCH_SIZE = 2000 # Procesar de a 2000 líneas
+
+    #     for i, line in enumerate(lines):
+    #         if i > 500: # Probar solo con las primeras 500 líneas
+    #             break
+    #         line = (line or '').strip()
+    #         if not line:
+    #             continue
+                
+    #         lista = line.split(';') # Asegúrate de que este sea el delimitador configurado (self.delimiter)
+
+    #         # Trabajamos sobre el CSV estándar de la API de Santa Fe (12+ columnas)
+    #         if len(lista) >= 11:
+    #             cuit = (lista[3] or '').strip()
+                
+    #             # Si el CUIT no existe en nuestra base de clientes, lo ignoramos para ahorrar espacio
+    #             if not cuit or cuit not in cuit_partners:
+    #                 continue
+
+    #             pub_date = _parse_compact_date(lista[0])
+    #             f_from = _parse_compact_date(lista[1])
+    #             f_to = _parse_compact_date(lista[2])
+                
+    #             type_contr = (lista[4] or '').strip()
+    #             alta_baja_status = (lista[6] or '').strip() # 'S' o 'N'
+                
+    #             a_per = _parse_float(lista[7])
+    #             a_ret = _parse_float(lista[8])
+    #             nro_grupo = (lista[9] or '').strip()
+
+    #             base_vals = {
+    #                 'name': cuit,
+    #                 'publication_date': pub_date or fields.Date.today(),
+    #                 'effective_date_from': f_from or fields.Date.today(),
+    #                 'effective_date_to': f_to or fields.Date.today(),
+    #                 'type_contr_insc': type_contr,
+    #                 'alta_baja': 'S' if alta_baja_status == 'S' else 'N',
+    #                 'cambio': '',
+    #             }
+
+    #             # --- Lógica de Percepción ('P') ---
+    #             vals_p = dict(base_vals)
+    #             vals_p.update({'type_alicuot': 'P', 'a_per': a_per, 'a_ret': 0.0, 'nro_grupo_perc': nro_grupo})
+    #             p_id = padron_map.get((cuit, 'P'))
+    #             if p_id:
+    #                 to_update_ids.append(p_id)
+    #                 vals_to_update.append(vals_p)
+    #             else:
+    #                 to_create.append(vals_p)
+
+    #             # --- Lógica de Retención ('R') ---
+    #             vals_r = dict(base_vals)
+    #             vals_r.update({'type_alicuot': 'R', 'a_per': 0.0, 'a_ret': a_ret, 'nro_grupo_ret': nro_grupo})
+    #             r_id = padron_map.get((cuit, 'R'))
+    #             if r_id:
+    #                 to_update_ids.append(r_id)
+    #                 vals_to_update.append(vals_r)
+    #             else:
+    #                 to_create.append(vals_r)
+
+    #             procesados += 1
+
+    #         # Ejecutar Lote si llegamos al límite
+    #         if len(to_create) >= BATCH_SIZE:
+    #             self.env['santafe.padron'].sudo().create(to_create)
+    #             to_create.clear()
+
+    #     # Crear el remanente de registros
+    #     if to_create:
+    #         self.env['santafe.padron'].sudo().create(to_create)
+
+    #     # Actualizar los existentes (Iteración estándar, ya que update múltiple con distintos vals es complejo en Odoo)
+    #     for p_id, vals in zip(to_update_ids, vals_to_update):
+    #         self.env['santafe.padron'].sudo().browse(p_id).write(vals)
+
+    #     self.state = 'processed'
+    #     # Mensaje de éxito en pantalla
+    #     return {
+    #         'type': 'ir.actions.client',
+    #         'tag': 'display_notification',
+    #         'params': {
+    #             'title': 'Proceso completado',
+    #             'message': f'Se procesaron e importaron {procesados} clientes exitosamente.',
+    #             'type': 'success',
+    #             'sticky': False,
+    #         }
+    #     }
     def btn_process(self):
         self.ensure_one()
 
@@ -477,7 +620,7 @@ class ImportPadronSantaFe(models.Model):
                         'effective_date_to':   f_to,
                         'type_contr_insc':     type_contr,
                         'alta_baja':           alta_baja,
-                        'cambio':              False,
+                        'cambio':              '',
                     }
 
                     # Percepción
